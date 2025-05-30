@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3ebthii boss</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    .lanyard-banner {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .lanyard-banner img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .lanyard-banner img:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <video loop id="background-video">
+    <source src="supra.mp4" type="video/mp4">
+  </video>
+
+  <div class="black-overlay"></div>
+
+  <div id="start-screen" class="start-screen">
+    <button id="start-button" class="start-button">START</button>
+  </div>
+
+  <section><div id="content" class="content" style="display: none;">
+    <img src="pfp.png" alt="Profile Picture" class="profile-pic">
+    <h1>3ebthii</h1>
+    <p class="desc">Just a Lil peep en</p>
+
+    <!-- ✅ Lanyard Discord Banner -->
+    <div class="lanyard-banner">
+      <a href="https://discord.com/users/1226498454381920298" target="_blank">
+        <img src="https://lanyard.cnrad.dev/api/1226498454381920298" alt="Profil Discord" />
+      </a>
+    </div>
+
+    
+    <div class="badges">
+      <i class="fas fa-star"></i>
+      <i class="fas fa-cog"></i>
+    </div>
+    <div class="socials">
+      <a href="https://discord.com/users/1226498454381920298" target="_blank"><i class="fab fa-discord"></i></a>
+      <a href="https://open.spotify.com/user/31yqy4jzajpruztw6dwar5rfxzoq" target="_blank"><i class="fab fa-spotify"></i></a>
+      <a href="https://instagram.com/amen_labidi" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
+  </div>
+</section>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const startButton = document.getElementById('start-button');
+      const startScreen = document.getElementById('start-screen');
+      const content = document.getElementById('content');
+      const video = document.getElementById('background-video');
+      const blackOverlay = document.querySelector('.black-overlay');
+
+      // Discord Status Elements
+      const statusLine = document.getElementById('status-line');
+      const discordActivity = document.getElementById('discord-activity');
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+
+      const DISCORD_USER_ID = "1226498454381920298";
+
+      async function updateDiscordStatus() {
+        try {
+          const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+          const data = await response.json();
+
+          if (data.success) {
+            const discordData = data.data;
+            const status = discordData.discord_status;
+            const activities = discordData.activities;
+
+            const statusInfo = {
+              online: { text: "En ligne", color: "#3ba55c", class: "online" },
+              idle: { text: "Inactif", color: "#faa61a", class: "idle" },
+              dnd: { text: "Ne pas déranger", color: "#ed4245", class: "dnd" },
+              offline: { text: "Hors ligne", color: "#747f8d", class: "offline" }
+            };
+
+            const currentStatus = statusInfo[status] || statusInfo.offline;
+            statusDot.style.backgroundColor = currentStatus.color;
+            statusText.textContent = currentStatus.text;
+            statusDot.className = "status-dot " + currentStatus.class;
+
+            // Custom status
+            const customStatus = activities.find(a => a.type === 4);
+            if (customStatus && customStatus.state && customStatus.state.trim() !== "") {
+              statusLine.textContent = customStatus.state;
+            } else {
+              statusLine.textContent = "Aucun statut personnalisé";
+            }
+
+            // Game or app
+            const activeGame = activities.find(a => a.type === 0);
+            discordActivity.textContent = activeGame ? activeGame.name : " ";
+          }
+        } catch (error) {
+          console.error("Erreur API Discord:", error);
+          statusLine.textContent = "Statut indisponible";
+        }
+      }
+
+      startButton.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        blackOverlay.style.display = 'none';
+        content.style.display = 'block';
+        video.style.display = 'block';
+        video.muted = false;
+        video.play().catch(e => console.log("Erreur vidéo:", e));
+
+        updateDiscordStatus();
+        setInterval(updateDiscordStatus, 10000);
+      });
+    });
+  </script>
+</body>
+</html>
